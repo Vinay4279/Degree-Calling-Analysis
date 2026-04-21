@@ -112,7 +112,11 @@ st.markdown("""
     [data-testid="stSidebarHeader"] { padding-top: 1rem !important; padding-bottom: 0rem !important; min-height: auto !important; }
     [data-testid="stSidebarUserContent"] { padding-top: 0rem !important; }
     hr { border-color: rgba(255, 255, 255, 0.1) !important; margin-top: 1rem !important; margin-bottom: 1rem !important; }
-
+    
+    /* ==========================================================
+       SECURITY & UI LOCKS (PERFECTED FIX)
+       ========================================================== */
+    
     /* Fix to ensure the unhide (>) option remains visible after hiding sidebar */
     [data-testid="collapsedControl"] {
         display: flex !important;
@@ -120,14 +124,8 @@ st.markdown("""
         z-index: 9999 !important;
     }
     
-    /* ==========================================================
-       SECURITY & UI LOCKS
-       ========================================================== */
-    
-    /* 1. HIDE TOP RIGHT MENU (Settings, Deploy, GitHub, etc.) safely */
-    [data-testid="stToolbar"], 
-    [data-testid="stActionElements"], 
-    .stDeployButton {
+    /* 1. HIDE TOP RIGHT MENU (Settings, Deploy, GitHub, etc.) */
+    [data-testid="stToolbar"] {
         display: none !important;
     }
 
@@ -135,6 +133,11 @@ st.markdown("""
     .viewerBadge_container, 
     [class*="viewerBadge"], 
     #manage-app-badge {
+        display: none !important;
+    }
+    
+    /* 3. HIDE "Press Enter to submit" TEXT IN LOGIN FORM */
+    div[data-testid="InputInstructions"] {
         display: none !important;
     }
 </style>
