@@ -114,20 +114,17 @@ st.markdown("""
     hr { border-color: rgba(255, 255, 255, 0.1) !important; margin-top: 1rem !important; margin-bottom: 1rem !important; }
     
     /* ==========================================================
-       SECURITY & UI LOCKS (As Per New Requirements)
+       SECURITY & UI LOCKS
        ========================================================== */
     
-    /* 1. PERMANENTLY HIDE TOP RIGHT MENU & HEADER FOR EVERYONE */
-    [data-testid="stHeader"] {
-        display: none !important;
-    }
-    
-    /* 2. PERMANENTLY HIDE SIDEBAR COLLAPSE BUTTON (Sidebar Always Visible) */
-    [data-testid="collapsedControl"] {
+    /* 1. PERMANENTLY HIDE TOP RIGHT MENU (Settings, Deploy, GitHub, etc.) */
+    [data-testid="stToolbar"], 
+    [data-testid="stActionElements"], 
+    .stDeployButton {
         display: none !important;
     }
 
-    /* 3. GLOBALLY HIDE MANAGE APP & STREAMLIT CLOUD BADGES */
+    /* 2. GLOBALLY HIDE MANAGE APP & STREAMLIT CLOUD BADGES */
     .viewerBadge_container, 
     [class*="viewerBadge"], 
     #manage-app-badge {
