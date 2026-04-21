@@ -307,9 +307,11 @@ if check_password():
                 password=st.secrets["mysql"]["password"]
             )
             
+            # Dynamic SQL query with DAYNAME() added right after dial_date
             query = f"""
             SELECT
                 t.dial_date,
+                DAYNAME(t.dial_date) AS Day_of_Week,
                 t.lc_email,
                 CASE WHEN t.Total_Dials_Calls > 5 THEN 'Present' ELSE 'Absent' END AS Attendance,
                 t.Total_Dials_Calls,
@@ -376,11 +378,10 @@ if check_password():
             
         if not report_df.empty:
             
-            # --- NEW FEATURE: SEARCH BAR FOR LC EMAIL ---
+            # --- SEARCH BAR FOR LC EMAIL ---
             search_lc = st.text_input("🔍 Search by LC Email or ID...", placeholder="Type here to filter data by LC...")
             
             if search_lc:
-                # Case-insensitive search on the lc_email column
                 if 'lc_email' in report_df.columns:
                     mask = report_df['lc_email'].astype(str).str.contains(search_lc, case=False, na=False)
                     display_report_df = report_df[mask]
