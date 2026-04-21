@@ -10,8 +10,8 @@ import base64
 # ==============================================================================
 # STEP 2: PAGE CONFIGURATION & ENTERPRISE UI STYLING (CSS)
 # ==============================================================================
-# Naya Project: Degree Calling Analysis
-st.set_page_config(page_title="Degree Calling Analysis", page_icon="📜", layout="wide")
+# Naya Project: Certification Analysis
+st.set_page_config(page_title="Certification Analysis", page_icon="📜", layout="wide")
 
 st.markdown("""
 <style>
@@ -113,26 +113,6 @@ st.markdown("""
     [data-testid="stSidebarUserContent"] { padding-top: 0rem !important; }
     hr { border-color: rgba(255, 255, 255, 0.1) !important; margin-top: 1rem !important; margin-bottom: 1rem !important; }
     
-    /* ==========================================================
-       SECURITY & UI LOCKS (As Per New Requirements)
-       ========================================================== */
-    
-    /* 1. PERMANENTLY HIDE TOP RIGHT MENU & HEADER FOR EVERYONE */
-    [data-testid="stHeader"] {
-        display: none !important;
-    }
-    
-    /* 2. PERMANENTLY HIDE SIDEBAR COLLAPSE BUTTON (Sidebar Always Visible) */
-    [data-testid="collapsedControl"] {
-        display: none !important;
-    }
-
-    /* 3. GLOBALLY HIDE MANAGE APP & STREAMLIT CLOUD BADGES */
-    .viewerBadge_container, 
-    [class*="viewerBadge"], 
-    #manage-app-badge {
-        display: none !important;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -208,11 +188,12 @@ def check_password():
             st.session_state["password_correct"] = False 
 
     if not st.session_state.get("password_correct"):
+        # Login page par sirf essential information (Company Name, Title, Form)
         st.markdown("<br><br><br>", unsafe_allow_html=True) 
         col1, col2, col3 = st.columns([1, 1.5, 1]) 
         with col2:
             st.markdown("<h3 style='text-align: center; color: #94a3b8; font-weight: 500; letter-spacing: 2px; margin-bottom: -15px;'>HERO VIRED PVT LTD.</h3>", unsafe_allow_html=True)
-            st.markdown("<h1 style='text-align: center; font-size: 36px;'>🔐 <span class='gradient-text'>Degree Calling Analysis Login</span></h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; font-size: 36px;'>🔐 <span class='gradient-text'>Certification Analysis Login</span></h1>", unsafe_allow_html=True)
             st.markdown("<br>", unsafe_allow_html=True)
             
             with st.form("login_form"):
@@ -243,7 +224,7 @@ if check_password():
     st.sidebar.markdown("---")
     
     # ---------------------------------------------------------
-    # NEW FEATURE: REPORTS DROPDOWN (For 8-10 Scripts)
+    # REPORTS DROPDOWN (For 8-10 Scripts)
     # ---------------------------------------------------------
     st.sidebar.markdown("<h3 style='text-align: center; color: #00f2fe;'>📊 Select Report</h3>", unsafe_allow_html=True)
     report_list = [
@@ -262,12 +243,24 @@ if check_password():
         
     st.sidebar.markdown("---")
     
-    # Date Filters
+    # ---------------------------------------------------------
+    # SMART DATE LOGIC (Restrict to Last 3 Months)
+    # ---------------------------------------------------------
     today = datetime.date.today()
-    first_day_of_month = today.replace(day=1)
     
-    start_date = st.sidebar.date_input("Start Date", value=first_day_of_month)
-    end_date = st.sidebar.date_input("End Date", value=today)
+    # Calculate the minimum allowed date (First day of the month, 2 months ago)
+    if today.month <= 2:
+        min_month = today.month + 10
+        min_year = today.year - 1
+    else:
+        min_month = today.month - 2
+        min_year = today.year
+        
+    min_allowed_date = datetime.date(min_year, min_month, 1)
+    
+    # Applied constraints (min_value, max_value) to lock the calendar
+    start_date = st.sidebar.date_input("Start Date", value=today.replace(day=1), min_value=min_allowed_date, max_value=today)
+    end_date = st.sidebar.date_input("End Date", value=today, min_value=min_allowed_date, max_value=today)
     
     st.sidebar.markdown("---")
     
@@ -278,7 +271,7 @@ if check_password():
         st.rerun()
 
     # Main Dashboard Title
-    st.markdown("<h1>📜 <span class='gradient-text'>Degree Calling Analysis Dashboard</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1>📜 <span class='gradient-text'>Certification Analysis Dashboard</span></h1>", unsafe_allow_html=True)
     st.markdown(f"#### Currently Viewing: `{selected_report}`")
 
 # ==============================================================================
@@ -296,7 +289,7 @@ if check_password():
                 password=st.secrets["mysql"]["password"]
             )
             
-            # Ye SQL query humne dynamic bana di hai taaki Sidebar ki dates isme pass ho sakein
+            # Dynamic SQL query linked with user selected dates
             query = f"""
             SELECT
                 t.dial_date,
