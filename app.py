@@ -114,27 +114,17 @@ st.markdown("""
     hr { border-color: rgba(255, 255, 255, 0.1) !important; margin-top: 1rem !important; margin-bottom: 1rem !important; }
     
     /* ==========================================================
-       SECURITY & UI LOCKS (FORCE VISIBLE SIDEBAR ARROW)
+       SECURITY & UI LOCKS (PERFECTED FIX)
        ========================================================== */
     
-    /* 1. HIDE TOP RIGHT MENU (Settings, Deploy, GitHub, etc.) safely */
+    /* 1. HIDE TOP RIGHT MENU (Settings, Deploy, GitHub, etc.) specifically without hiding the left toggle */
     [data-testid="stToolbar"], 
-    [data-testid="stActionElements"], 
+    .stAppDeployButton,
     .stDeployButton {
         display: none !important;
-        visibility: hidden !important;
     }
 
-    /* 2. FORCE UNHIDE ARROW (>) TO BE VISIBLE ALWAYS */
-    [data-testid="collapsedControl"] {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        z-index: 999999 !important;
-        color: #00f2fe !important; /* Halka blue color taaki easily dikh jaye */
-    }
-
-    /* 3. GLOBALLY HIDE MANAGE APP & STREAMLIT CLOUD BADGES */
+    /* 2. GLOBALLY HIDE MANAGE APP & STREAMLIT CLOUD BADGES */
     .viewerBadge_container, 
     [class*="viewerBadge"], 
     #manage-app-badge {
