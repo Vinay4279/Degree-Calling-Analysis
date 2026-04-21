@@ -113,6 +113,26 @@ st.markdown("""
     [data-testid="stSidebarUserContent"] { padding-top: 0rem !important; }
     hr { border-color: rgba(255, 255, 255, 0.1) !important; margin-top: 1rem !important; margin-bottom: 1rem !important; }
     
+    /* ==========================================================
+       SECURITY & UI LOCKS (As Per New Requirements)
+       ========================================================== */
+    
+    /* 1. PERMANENTLY HIDE TOP RIGHT MENU & HEADER FOR EVERYONE */
+    [data-testid="stHeader"] {
+        display: none !important;
+    }
+    
+    /* 2. PERMANENTLY HIDE SIDEBAR COLLAPSE BUTTON (Sidebar Always Visible) */
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
+
+    /* 3. GLOBALLY HIDE MANAGE APP & STREAMLIT CLOUD BADGES */
+    .viewerBadge_container, 
+    [class*="viewerBadge"], 
+    #manage-app-badge {
+        display: none !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -248,7 +268,6 @@ if check_password():
     # ---------------------------------------------------------
     today = datetime.date.today()
     
-    # Calculate the minimum allowed date (First day of the month, 2 months ago)
     if today.month <= 2:
         min_month = today.month + 10
         min_year = today.year - 1
@@ -258,7 +277,6 @@ if check_password():
         
     min_allowed_date = datetime.date(min_year, min_month, 1)
     
-    # Applied constraints (min_value, max_value) to lock the calendar
     start_date = st.sidebar.date_input("Start Date", value=today.replace(day=1), min_value=min_allowed_date, max_value=today)
     end_date = st.sidebar.date_input("End Date", value=today, min_value=min_allowed_date, max_value=today)
     
@@ -289,7 +307,6 @@ if check_password():
                 password=st.secrets["mysql"]["password"]
             )
             
-            # Dynamic SQL query linked with user selected dates
             query = f"""
             SELECT
                 t.dial_date,
@@ -358,19 +375,33 @@ if check_password():
             report_df = load_calling_script_data(start_date, end_date)
             
         if not report_df.empty:
+            
+            # --- NEW FEATURE: SEARCH BAR FOR LC EMAIL ---
+            search_lc = st.text_input("🔍 Search by LC Email or ID...", placeholder="Type here to filter data by LC...")
+            
+            if search_lc:
+                # Case-insensitive search on the lc_email column
+                if 'lc_email' in report_df.columns:
+                    mask = report_df['lc_email'].astype(str).str.contains(search_lc, case=False, na=False)
+                    display_report_df = report_df[mask]
+                else:
+                    display_report_df = report_df
+            else:
+                display_report_df = report_df
+                
             # --- CSV DOWNLOAD BUTTON ---
             colA, colB = st.columns([8, 2])
             with colB:
                 st.download_button(
                     label="📥 Download CSV", 
-                    data=report_df.to_csv(index=False).encode('utf-8'), 
+                    data=display_report_df.to_csv(index=False).encode('utf-8'), 
                     file_name=f"Calling_Script_Day_Wise_{start_date}_to_{end_date}.csv", 
                     mime="text/csv", 
                     use_container_width=True
                 )
             
-            st.dataframe(report_df, use_container_width=True, height=min(750, (len(report_df) + 1) * 36 + 10))
-            st.caption(f"Total Rows Fetched: {len(report_df)}")
+            st.dataframe(display_report_df, use_container_width=True, height=min(750, (len(display_report_df) + 1) * 36 + 10))
+            st.caption(f"Total Rows Fetched: {len(display_report_df)}")
         else:
             st.info("No data found for the selected date range.")
 
