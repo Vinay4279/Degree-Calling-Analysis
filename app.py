@@ -208,7 +208,6 @@ def check_password():
             st.session_state["password_correct"] = False 
 
     if not st.session_state.get("password_correct"):
-        # Login page par sirf essential information (Company Name, Title, Form)
         st.markdown("<br><br><br>", unsafe_allow_html=True) 
         col1, col2, col3 = st.columns([1, 1.5, 1]) 
         with col2:
@@ -248,7 +247,7 @@ if check_password():
     # ---------------------------------------------------------
     st.sidebar.markdown("<h3 style='text-align: center; color: #00f2fe;'>📊 Select Report</h3>", unsafe_allow_html=True)
     report_list = [
-        "Calling Script Day Wise", 
+        "Calling LC Level", 
         "Report 2 (Coming Soon...)", 
         "Report 3 (Coming Soon...)"
     ]
@@ -307,23 +306,23 @@ if check_password():
                 password=st.secrets["mysql"]["password"]
             )
             
-            # Dynamic SQL query with DAYNAME() added right after dial_date
+            # SQL Query: Clean Headers & Double Ordering added
             query = f"""
             SELECT
-                t.dial_date,
-                DAYNAME(t.dial_date) AS Day_of_Week,
-                t.lc_email,
-                CASE WHEN t.Total_Dials_Calls > 5 THEN 'Present' ELSE 'Absent' END AS Attendance,
-                t.Total_Dials_Calls,
-                t.Unique_Leads,
-                t.Answered,
-                CONCAT(IFNULL(ROUND(CASE WHEN t.Total_Dials_Calls = 0 THEN 0 ELSE (t.Answered / t.Total_Dials_Calls) * 100 END, 2), 0), '%') AS Conn_Per,
-                t.Unique_Answered,
-                CONCAT(IFNULL(ROUND((t.Unique_Answered / NULLIF(t.Unique_Leads, 0)) * 100, 2), 0), '%') AS Unique_Conn_Per,
-                IFNULL(TIME_FORMAT(SEC_TO_TIME(t.Talktime_Seconds), '%H:%i:%s'), '00:00:00') AS Talktime,
-                CONCAT(IFNULL(ROUND((t.Calls_30_Sec / NULLIF(t.Total_Dials_Calls, 0)) * 100, 2), 0), '%') AS `30_sec_Conn_Per`,
-                t.`2_Minutes_Call`,
-                t.`5_Minutes_Call`
+                t.dial_date AS `Dial Date`,
+                DAYNAME(t.dial_date) AS `Day of Week`,
+                t.lc_email AS `LC Email`,
+                CASE WHEN t.Total_Dials_Calls > 5 THEN 'Present' ELSE 'Absent' END AS `Attendance`,
+                t.Total_Dials_Calls AS `Total Dials Calls`,
+                t.Unique_Leads AS `Unique Leads`,
+                t.Answered AS `Answered`,
+                CONCAT(IFNULL(ROUND(CASE WHEN t.Total_Dials_Calls = 0 THEN 0 ELSE (t.Answered / t.Total_Dials_Calls) * 100 END, 2), 0), '%') AS `Conn %`,
+                t.Unique_Answered AS `Unique Answered`,
+                CONCAT(IFNULL(ROUND((t.Unique_Answered / NULLIF(t.Unique_Leads, 0)) * 100, 2), 0), '%') AS `Unique Conn %`,
+                IFNULL(TIME_FORMAT(SEC_TO_TIME(t.Talktime_Seconds), '%H:%i:%s'), '00:00:00') AS `Talktime`,
+                CONCAT(IFNULL(ROUND((t.Calls_30_Sec / NULLIF(t.Total_Dials_Calls, 0)) * 100, 2), 0), '%') AS `30 Sec Conn %`,
+                t.`2_Minutes_Call` AS `2 Minutes Call`,
+                t.`5_Minutes_Call` AS `5 Minutes Call`
             FROM (
                 SELECT
                     DATE_FORMAT(DATE_ADD(cscl.Date_Entered, INTERVAL 330 MINUTE), '%Y-%m-%d') AS dial_date,
@@ -358,7 +357,7 @@ if check_password():
                     DATE_FORMAT(DATE_ADD(cscl.Date_Entered, INTERVAL 330 MINUTE), '%Y-%m-%d'),
                     CASE WHEN cscl.owner LIKE '%@%' THEN cscl.owner ELSE IFNULL(user_info.email_address, 'N/A') END
             ) t
-            ORDER BY t.dial_date DESC
+            ORDER BY t.dial_date DESC, t.lc_email ASC
             """
             df = pd.read_sql(query, conn)
             conn.close()
@@ -371,19 +370,20 @@ if check_password():
 # STEP 6: DYNAMIC REPORT RENDERING
 # ==============================================================================
     
-    # 1. REPORT: Calling Script Day Wise
-    if selected_report == "Calling Script Day Wise":
+    # 1. REPORT: Calling LC Level
+    if selected_report == "Calling LC Level":
         with st.spinner("Fetching Data from Database... Please wait."):
             report_df = load_calling_script_data(start_date, end_date)
             
         if not report_df.empty:
             
             # --- SEARCH BAR FOR LC EMAIL ---
-            search_lc = st.text_input("🔍 Search by LC Email or ID...", placeholder="Type here to filter data by LC...")
+            search_lc = st.text_input("🔍 Search by LC Email...", placeholder="Type here to filter data by LC...")
             
             if search_lc:
-                if 'lc_email' in report_df.columns:
-                    mask = report_df['lc_email'].astype(str).str.contains(search_lc, case=False, na=False)
+                # Backend me update kiye gaye naye column name "LC Email" ke hisaab se filter
+                if 'LC Email' in report_df.columns:
+                    mask = report_df['LC Email'].astype(str).str.contains(search_lc, case=False, na=False)
                     display_report_df = report_df[mask]
                 else:
                     display_report_df = report_df
@@ -396,7 +396,7 @@ if check_password():
                 st.download_button(
                     label="📥 Download CSV", 
                     data=display_report_df.to_csv(index=False).encode('utf-8'), 
-                    file_name=f"Calling_Script_Day_Wise_{start_date}_to_{end_date}.csv", 
+                    file_name=f"Calling_LC_Level_{start_date}_to_{end_date}.csv", 
                     mime="text/csv", 
                     use_container_width=True
                 )
