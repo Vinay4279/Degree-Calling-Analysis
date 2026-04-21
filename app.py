@@ -112,14 +112,21 @@ st.markdown("""
     [data-testid="stSidebarHeader"] { padding-top: 1rem !important; padding-bottom: 0rem !important; min-height: auto !important; }
     [data-testid="stSidebarUserContent"] { padding-top: 0rem !important; }
     hr { border-color: rgba(255, 255, 255, 0.1) !important; margin-top: 1rem !important; margin-bottom: 1rem !important; }
+
+    /* Fix to ensure the unhide (>) option remains visible after hiding sidebar */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        z-index: 9999 !important;
+    }
     
     /* ==========================================================
-       SECURITY & UI LOCKS (PERFECTED FIX)
+       SECURITY & UI LOCKS
        ========================================================== */
     
-    /* 1. HIDE TOP RIGHT MENU (Settings, Deploy, GitHub, etc.) specifically without hiding the left toggle */
+    /* 1. HIDE TOP RIGHT MENU (Settings, Deploy, GitHub, etc.) safely */
     [data-testid="stToolbar"], 
-    .stAppDeployButton,
+    [data-testid="stActionElements"], 
     .stDeployButton {
         display: none !important;
     }
