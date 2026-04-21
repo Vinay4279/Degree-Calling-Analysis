@@ -306,23 +306,23 @@ if check_password():
                 password=st.secrets["mysql"]["password"]
             )
             
-            # SQL Query: Clean Headers & Double Ordering added
+            # Backend safe query without spaces/symbols in aliases to prevent crashes
             query = f"""
             SELECT
-                t.dial_date AS `Dial Date`,
-                DAYNAME(t.dial_date) AS `Day of Week`,
-                t.lc_email AS `LC Email`,
-                CASE WHEN t.Total_Dials_Calls > 5 THEN 'Present' ELSE 'Absent' END AS `Attendance`,
-                t.Total_Dials_Calls AS `Total Dials Calls`,
-                t.Unique_Leads AS `Unique Leads`,
-                t.Answered AS `Answered`,
-                CONCAT(IFNULL(ROUND(CASE WHEN t.Total_Dials_Calls = 0 THEN 0 ELSE (t.Answered / t.Total_Dials_Calls) * 100 END, 2), 0), '%') AS `Conn %`,
-                t.Unique_Answered AS `Unique Answered`,
-                CONCAT(IFNULL(ROUND((t.Unique_Answered / NULLIF(t.Unique_Leads, 0)) * 100, 2), 0), '%') AS `Unique Conn %`,
-                IFNULL(TIME_FORMAT(SEC_TO_TIME(t.Talktime_Seconds), '%H:%i:%s'), '00:00:00') AS `Talktime`,
-                CONCAT(IFNULL(ROUND((t.Calls_30_Sec / NULLIF(t.Total_Dials_Calls, 0)) * 100, 2), 0), '%') AS `30 Sec Conn %`,
-                t.`2_Minutes_Call` AS `2 Minutes Call`,
-                t.`5_Minutes_Call` AS `5 Minutes Call`
+                t.dial_date,
+                DAYNAME(t.dial_date) AS day_of_week,
+                t.lc_email,
+                CASE WHEN t.Total_Dials_Calls > 5 THEN 'Present' ELSE 'Absent' END AS attendance,
+                t.Total_Dials_Calls AS total_dials_calls,
+                t.Unique_Leads AS unique_leads,
+                t.Answered AS answered,
+                CONCAT(IFNULL(ROUND(CASE WHEN t.Total_Dials_Calls = 0 THEN 0 ELSE (t.Answered / t.Total_Dials_Calls) * 100 END, 2), 0), '%') AS conn_per,
+                t.Unique_Answered AS unique_answered,
+                CONCAT(IFNULL(ROUND((t.Unique_Answered / NULLIF(t.Unique_Leads, 0)) * 100, 2), 0), '%') AS unique_conn_per,
+                IFNULL(TIME_FORMAT(SEC_TO_TIME(t.Talktime_Seconds), '%H:%i:%s'), '00:00:00') AS talktime,
+                CONCAT(IFNULL(ROUND((t.Calls_30_Sec / NULLIF(t.Total_Dials_Calls, 0)) * 100, 2), 0), '%') AS calls_30_sec_per,
+                t.`2_Minutes_Call` AS calls_2_mins,
+                t.`5_Minutes_Call` AS calls_5_mins
             FROM (
                 SELECT
                     DATE_FORMAT(DATE_ADD(cscl.Date_Entered, INTERVAL 330 MINUTE), '%Y-%m-%d') AS dial_date,
@@ -361,6 +361,25 @@ if check_password():
             """
             df = pd.read_sql(query, conn)
             conn.close()
+            
+            # Python Pandas Rename Method - Guarantees 100% safe rendering of Clean Headers
+            df.rename(columns={
+                'dial_date': 'Dial Date',
+                'day_of_week': 'Day of Week',
+                'lc_email': 'LC Email',
+                'attendance': 'Attendance',
+                'total_dials_calls': 'Total Dials Calls',
+                'unique_leads': 'Unique Leads',
+                'answered': 'Answered',
+                'conn_per': 'Conn %',
+                'unique_answered': 'Unique Answered',
+                'unique_conn_per': 'Unique Conn %',
+                'talktime': 'Talktime',
+                'calls_30_sec_per': '30 Sec Conn %',
+                'calls_2_mins': '2 Minutes Call',
+                'calls_5_mins': '5 Minutes Call'
+            }, inplace=True)
+            
             return df
         except Exception as e:
             st.error(f"Database connection error: {e}")
