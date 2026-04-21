@@ -114,17 +114,27 @@ st.markdown("""
     hr { border-color: rgba(255, 255, 255, 0.1) !important; margin-top: 1rem !important; margin-bottom: 1rem !important; }
     
     /* ==========================================================
-       SECURITY & UI LOCKS
+       SECURITY & UI LOCKS (FORCE VISIBLE SIDEBAR ARROW)
        ========================================================== */
     
-    /* 1. PERMANENTLY HIDE TOP RIGHT MENU (Settings, Deploy, GitHub, etc.) */
+    /* 1. HIDE TOP RIGHT MENU (Settings, Deploy, GitHub, etc.) safely */
     [data-testid="stToolbar"], 
     [data-testid="stActionElements"], 
     .stDeployButton {
         display: none !important;
+        visibility: hidden !important;
     }
 
-    /* 2. GLOBALLY HIDE MANAGE APP & STREAMLIT CLOUD BADGES */
+    /* 2. FORCE UNHIDE ARROW (>) TO BE VISIBLE ALWAYS */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 999999 !important;
+        color: #00f2fe !important; /* Halka blue color taaki easily dikh jaye */
+    }
+
+    /* 3. GLOBALLY HIDE MANAGE APP & STREAMLIT CLOUD BADGES */
     .viewerBadge_container, 
     [class*="viewerBadge"], 
     #manage-app-badge {
@@ -303,7 +313,6 @@ if check_password():
                 password=st.secrets["mysql"]["password"]
             )
             
-            # Backend safe query without spaces/symbols in aliases to prevent crashes
             query = f"""
             SELECT
                 t.dial_date,
@@ -359,7 +368,6 @@ if check_password():
             df = pd.read_sql(query, conn)
             conn.close()
             
-            # Python Pandas Rename Method - Guarantees 100% safe rendering of Clean Headers
             df.rename(columns={
                 'dial_date': 'Dial Date',
                 'day_of_week': 'Day of Week',
@@ -386,18 +394,14 @@ if check_password():
 # STEP 6: DYNAMIC REPORT RENDERING
 # ==============================================================================
     
-    # 1. REPORT: Calling LC Level
     if selected_report == "Calling LC Level":
         with st.spinner("Fetching Data from Database... Please wait."):
             report_df = load_calling_script_data(start_date, end_date)
             
         if not report_df.empty:
-            
-            # --- SEARCH BAR FOR LC EMAIL ---
             search_lc = st.text_input("🔍 Search by LC Email...", placeholder="Type here to filter data by LC...")
             
             if search_lc:
-                # Backend me update kiye gaye naye column name "LC Email" ke hisaab se filter
                 if 'LC Email' in report_df.columns:
                     mask = report_df['LC Email'].astype(str).str.contains(search_lc, case=False, na=False)
                     display_report_df = report_df[mask]
@@ -406,7 +410,6 @@ if check_password():
             else:
                 display_report_df = report_df
                 
-            # --- CSV DOWNLOAD BUTTON ---
             colA, colB = st.columns([8, 2])
             with colB:
                 st.download_button(
@@ -422,7 +425,6 @@ if check_password():
         else:
             st.info("No data found for the selected date range.")
 
-    # 2. REPORT: PLACEHOLDERS FOR FUTURE SCRIPTS
     elif selected_report == "Report 2 (Coming Soon...)":
         st.info("This report module is under construction. Please provide the SQL script to activate it.")
         
