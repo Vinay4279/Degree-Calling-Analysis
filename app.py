@@ -10,8 +10,8 @@ import base64
 # ==============================================================================
 # STEP 2: PAGE CONFIGURATION & ENTERPRISE UI STYLING (CSS)
 # ==============================================================================
-# Naya Project: Certification Analysis
-st.set_page_config(page_title="Certification Analysis", page_icon="📜", layout="wide")
+# Project Name Updated: Degree Calling Analysis
+st.set_page_config(page_title="Degree Calling Analysis", page_icon="📞", layout="wide")
 
 st.markdown("""
 <style>
@@ -193,7 +193,7 @@ def check_password():
         col1, col2, col3 = st.columns([1, 1.5, 1]) 
         with col2:
             st.markdown("<h3 style='text-align: center; color: #94a3b8; font-weight: 500; letter-spacing: 2px; margin-bottom: -15px;'>HERO VIRED PVT LTD.</h3>", unsafe_allow_html=True)
-            st.markdown("<h1 style='text-align: center; font-size: 36px;'>🔐 <span class='gradient-text'>Certification Analysis Login</span></h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; font-size: 36px;'>🔐 <span class='gradient-text'>Degree Calling Analysis Login</span></h1>", unsafe_allow_html=True)
             st.markdown("<br>", unsafe_allow_html=True)
             
             with st.form("login_form"):
@@ -271,7 +271,7 @@ if check_password():
         st.rerun()
 
     # Main Dashboard Title
-    st.markdown("<h1>📜 <span class='gradient-text'>Certification Analysis Dashboard</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1>📞 <span class='gradient-text'>Degree Calling Analysis Dashboard</span></h1>", unsafe_allow_html=True)
     st.markdown(f"#### Currently Viewing: `{selected_report}`")
 
 # ==============================================================================
